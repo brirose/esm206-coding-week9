@@ -1,0 +1,80 @@
+---
+title: "part1_mlr_bb"
+author: "Bri Baker"
+date: "11/30/2020"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, message = FALSE)
+library(tidyverse)
+library(palmerpenguins)
+library(GGally)
+library(stargazer)
+```
+
+# Data exploration
+```{r}
+penguins %>% 
+  ggpairs(aes(color = species))
+```
+
+```{r}
+penguins %>% 
+  select(species, bill_length_mm:body_mass_g) %>% 
+  ggpairs(aes(color= species))
+```
+
+can use `car::vif()` to explore coliniarity
+
+# Regression Models
+
+```{r}
+lm1 <- lm(body_mass_g ~ flipper_length_mm + species, data = penguins)
+
+lm2 <- lm(body_mass_g ~ flipper_length_mm + species + sex, data = penguins)
+
+lm3 <- lm(body_mass_g ~ flipper_length_mm + species + sex + bill_length_mm, data = penguins)
+
+lm4 <- lm(body_mass_g ~ flipper_length_mm + species + sex + bill_length_mm + island, data = penguins)
+
+
+```
+
+
+```{r}
+plot(lm1)
+plot(lm2)
+plot(lm3)
+plot(lm4)
+```
+
+```{r}
+AIC(lm1)
+AIC(lm2)
+AIC(lm3)
+AIC(lm4)
+
+```
+
+
+```{r}
+stargazer(lm1, lm3, type = "html")
+```
+
+
+# Omitted Bias
+
+```{r}
+ggplot(data = penguins, aes(x = flipper_length_mm, y = bill_depth_mm)) +
+  geom_point() +
+  geom_smooth(method = "lm")
+
+#versus
+ggplot(data = penguins, aes(x = flipper_length_mm, y = bill_depth_mm, group = species)) +
+  geom_point(aes(color = species)) +
+  geom_smooth(method = "lm")
+
+
+```
+

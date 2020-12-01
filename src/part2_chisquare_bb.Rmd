@@ -1,0 +1,56 @@
+---
+title: "Part 2"
+author: "Bri Baker"
+date: "11/30/2020"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(tidyverse)
+library(here)
+library(janitor)
+library(broom)
+```
+
+# Data and exploratory vis
+
+```{r}
+lizards <- read_csv(here("data", "lizards.csv"))
+```
+
+```{r}
+lizards %>% 
+  count(spp) %>% 
+  arrange(-n)
+```
+
+```{r}
+utst <- lizards %>% 
+  filter(spp == "UTST") %>% 
+  filter(site %in% c("IBPE", "RABB", "EAST")) %>% 
+  filter(tail %in% c("B", "W"))
+```
+
+
+```{r}
+tail_counts <- utst %>% 
+  janitor::tabyl(site, tail)
+
+# And you can get a table with both counts & proportions! 
+tail_proportions <- tail_counts %>% 
+  adorn_percentages() %>% 
+  janitor::adorn_pct_formatting(digits = 2) %>% 
+  adorn_ns()
+```
+
+```{r}
+lizard_ct <- tail_counts %>% 
+  column_to_rownames(var = "site")
+
+lizard_x2 <- chisq.test(lizard_ct)
+lizard_x2
+
+lizard_tidy <- tidy(lizard_x2)
+```
+
